@@ -1,0 +1,1627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroPredict — Bridging Neural & Behavioral Data with XAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a0a12;
+    --paper: #f5f3ee;
+    --electric: #00e5c0;
+    --electric-dim: #00e5c022;
+    --signal: #ff4d6d;
+    --neural: #7b5ea7;
+    --gold: #e8c84a;
+    --mid: #888;
+    --card-bg: #ffffff;
+    --border: #e0ddd6;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.2rem 3rem;
+    background: rgba(245,243,238,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.1rem; letter-spacing: -0.02em;
+    display: flex; align-items: center; gap: 0.5rem;
+    text-decoration: none; color: var(--ink);
+  }
+  .nav-logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--electric); display: inline-block; animation: pulse 2s infinite; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a { text-decoration: none; color: var(--mid); font-size: 0.88rem; font-weight: 500; transition: color 0.2s; letter-spacing: 0.01em; }
+  .nav-links a:hover { color: var(--ink); }
+
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 #00e5c055; }
+    50% { box-shadow: 0 0 0 6px #00e5c000; }
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 8rem 3rem 4rem;
+    gap: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 20%, #00e5c011 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 10% 80%, #7b5ea711 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--electric-dim); border: 1px solid #00e5c044;
+    border-radius: 100px; padding: 0.3rem 0.9rem;
+    font-size: 0.78rem; font-weight: 500; color: #00b89a;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.04em;
+    animation: fadeUp 0.8s ease both;
+  }
+  .hero-badge::before { content: '●'; font-size: 0.6rem; }
+  .hero-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.8rem, 4vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+  .hero-title em {
+    font-style: normal;
+    background: linear-gradient(135deg, var(--electric) 0%, var(--neural) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero-sub {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+    color: #555;
+    max-width: 44ch;
+    line-height: 1.7;
+    font-weight: 300;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .hero-actions {
+    margin-top: 2.5rem;
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--ink); color: var(--paper);
+    padding: 0.85rem 2rem; border-radius: 6px;
+    text-decoration: none; font-weight: 500; font-size: 0.92rem;
+    transition: all 0.2s; border: 2px solid var(--ink);
+    letter-spacing: 0.01em;
+  }
+  .btn-primary:hover { background: var(--electric); border-color: var(--electric); color: var(--ink); }
+  .btn-ghost {
+    border: 2px solid var(--border); color: var(--ink);
+    padding: 0.85rem 2rem; border-radius: 6px;
+    text-decoration: none; font-weight: 500; font-size: 0.92rem;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
+
+  /* Hero Visual */
+  .hero-visual {
+    position: relative;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+  .brain-diagram {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+  .brain-svg-wrap {
+    width: 100%; height: 100%;
+  }
+
+  /* ── SECTION COMMONS ── */
+  section { padding: 6rem 3rem; }
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem; letter-spacing: 0.12em;
+    color: var(--mid); text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.1;
+    max-width: 18ch;
+  }
+  .section-title em { font-style: normal; color: var(--neural); }
+
+  /* ── RESEARCH OVERVIEW ── */
+  #overview {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  #overview .section-label { color: var(--electric); }
+  #overview .section-title { color: var(--paper); }
+  #overview .section-title em { color: var(--electric); }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    margin-top: 3.5rem;
+    align-items: start;
+  }
+  .overview-text p {
+    color: #aaa;
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 1.2rem;
+    font-weight: 300;
+  }
+  .overview-text p strong { color: var(--paper); font-weight: 500; }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: #222;
+    border: 1px solid #222;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .stat-item {
+    background: #0f0f18;
+    padding: 2rem;
+    transition: background 0.3s;
+  }
+  .stat-item:hover { background: #141424; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--electric);
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.82rem;
+    color: #666;
+    margin-top: 0.4rem;
+    font-weight: 400;
+  }
+
+  /* ── COMPONENTS ── */
+  #components { background: var(--paper); }
+
+  .components-intro {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: end;
+    margin-bottom: 4rem;
+  }
+  .components-intro p {
+    color: #555;
+    font-size: 1rem;
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  .components-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .component-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: default;
+  }
+  .component-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--electric));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+  .component-card:hover { transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.08); }
+  .component-card:hover::before { transform: scaleX(1); }
+
+  .card-c1 { --card-accent: var(--electric); }
+  .card-c2 { --card-accent: var(--neural); }
+  .card-c3 { --card-accent: var(--signal); }
+  .card-c4 { --card-accent: var(--gold); }
+
+  .card-number {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem; letter-spacing: 0.1em;
+    color: var(--mid); margin-bottom: 1.2rem;
+  }
+  .card-tag {
+    display: inline-block;
+    font-size: 0.72rem; font-weight: 500;
+    padding: 0.25rem 0.7rem; border-radius: 100px;
+    background: var(--tag-bg, #f0faf8);
+    color: var(--tag-color, #00b89a);
+    margin-bottom: 1rem;
+    letter-spacing: 0.03em;
+  }
+  .card-c1 .card-tag { background: #f0faf8; color: #00b89a; }
+  .card-c2 .card-tag { background: #f3f0fa; color: #7b5ea7; }
+  .card-c3 .card-tag { background: #fff0f3; color: #cc2244; }
+  .card-c4 .card-tag { background: #fdf8e8; color: #b8940a; }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem; font-weight: 700;
+    letter-spacing: -0.02em; margin-bottom: 0.8rem;
+    line-height: 1.2;
+  }
+  .card-desc {
+    font-size: 0.9rem; color: #666; line-height: 1.7; font-weight: 300;
+    margin-bottom: 1.5rem;
+  }
+  .card-methods {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+  }
+  .method-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; padding: 0.2rem 0.6rem;
+    border-radius: 4px; background: #f5f3ee;
+    color: #555; border: 1px solid var(--border);
+  }
+  .card-researcher {
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.82rem; color: var(--mid);
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .researcher-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: white;
+    flex-shrink: 0;
+  }
+  .card-c1 .researcher-avatar { background: var(--electric); color: var(--ink); }
+  .card-c2 .researcher-avatar { background: var(--neural); }
+  .card-c3 .researcher-avatar { background: var(--signal); }
+  .card-c4 .researcher-avatar { background: var(--gold); color: var(--ink); }
+
+  /* ── METHODOLOGY ── */
+  #methodology {
+    background: #0a0a12;
+    color: var(--paper);
+    position: relative;
+    overflow: hidden;
+  }
+  #methodology::after {
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #7b5ea720 0%, transparent 70%);
+    pointer-events: none;
+  }
+  #methodology .section-label { color: var(--neural); }
+  #methodology .section-title { color: var(--paper); }
+
+  .pipeline {
+    margin-top: 4rem;
+    position: relative;
+  }
+  .pipeline-track {
+    position: absolute; left: 2.5rem; top: 0; bottom: 0;
+    width: 2px; background: linear-gradient(to bottom, var(--electric), var(--neural), var(--signal));
+  }
+  .pipeline-steps {
+    display: flex; flex-direction: column; gap: 0;
+  }
+  .pipeline-step {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 2rem;
+    align-items: start;
+    padding: 2rem 0;
+    border-bottom: 1px solid #1a1a28;
+    position: relative;
+    transition: background 0.3s;
+  }
+  .pipeline-step:last-child { border-bottom: none; }
+  .step-marker {
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+  }
+  .step-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--step-color, var(--electric));
+    border: 3px solid #0a0a12;
+    outline: 2px solid var(--step-color, var(--electric));
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+  }
+  .step-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem; color: #444;
+  }
+  .step-content {}
+  .step-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--paper); margin-bottom: 0.5rem;
+  }
+  .step-desc {
+    font-size: 0.9rem; color: #777; line-height: 1.7; font-weight: 300;
+    margin-bottom: 1rem;
+  }
+  .step-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .step-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem; padding: 0.2rem 0.55rem;
+    border-radius: 3px;
+    border: 1px solid #2a2a3a;
+    color: #888;
+    background: #111122;
+  }
+
+  /* ── TEAM ── */
+  #team { background: var(--paper); }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .team-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.1rem 1.1rem 1.5rem;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+  }
+  .team-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.07); }
+  .team-photo-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 0 auto 1.1rem;
+    background: linear-gradient(135deg, #eef5f3, #f5f3ee);
+    border: 1px solid var(--border);
+  }
+  .team-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .team-photo-badge {
+    position: absolute;
+    right: 0.8rem;
+    bottom: 0.8rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+
+  .team-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    letter-spacing: -0.01em; margin-bottom: 0.3rem;
+  }
+  .team-role {
+    font-size: 0.78rem; color: var(--mid);
+    line-height: 1.4; margin-bottom: 1rem;
+  }
+  .team-focus {
+    font-size: 0.75rem; font-weight: 500;
+    padding: 0.3rem 0.8rem; border-radius: 100px;
+    display: inline-block;
+  }
+
+  /* ── XAI HIGHLIGHT ── */
+  #xai {
+    background: linear-gradient(135deg, #f5f3ee 0%, #eef5f3 100%);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .xai-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+    margin-top: 1rem;
+  }
+  .xai-features {
+    display: flex; flex-direction: column; gap: 1.5rem;
+  }
+  .xai-feature {
+    display: flex; gap: 1.2rem; align-items: start;
+  }
+  .xai-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+  .xai-feature-text h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem;
+  }
+  .xai-feature-text p { font-size: 0.88rem; color: #666; line-height: 1.6; font-weight: 300; }
+
+  /* ── IMPACT ── */
+  #impact { background: var(--paper); }
+  .impact-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .impact-card {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .impact-card::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; right: -30px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: var(--ic-color, var(--electric));
+    opacity: 0.08;
+  }
+  .impact-icon { font-size: 2rem; margin-bottom: 1.2rem; }
+  .impact-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 0.8rem;
+    color: var(--paper);
+  }
+  .impact-card p { font-size: 0.88rem; color: #888; line-height: 1.7; font-weight: 300; }
+
+
+  /* ── SCOPE / DETAILS ── */
+  #scope { background: linear-gradient(180deg, #faf8f4 0%, #f5f3ee 100%); }
+  .scope-grid, .deliverables-grid, .downloads-grid, .contact-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+  .scope-card, .deliverable-card, .download-card, .contact-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.04);
+  }
+  .scope-card h3, .deliverable-card h3, .download-card h3, .contact-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.15rem;
+    margin-bottom: 0.8rem;
+    letter-spacing: -0.02em;
+  }
+  .scope-card p, .deliverable-card p, .download-card p, .contact-card p {
+    color: #666;
+    font-size: 0.92rem;
+    line-height: 1.75;
+    font-weight: 300;
+  }
+  .scope-list {
+    margin-top: 1rem;
+    display: grid;
+    gap: 0.65rem;
+  }
+  .scope-list li {
+    list-style: none;
+    padding-left: 1.2rem;
+    position: relative;
+    color: #555;
+    font-size: 0.9rem;
+  }
+  .scope-list li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--electric);
+  }
+  .tech-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.2rem;
+  }
+  .tech-chip {
+    padding: 0.45rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: #faf8f4;
+    font-size: 0.8rem;
+    color: #555;
+    font-family: 'DM Mono', monospace;
+  }
+  .timeline {
+    margin-top: 3rem;
+    display: grid;
+    gap: 1rem;
+  }
+  .timeline-item {
+    display: grid;
+    grid-template-columns: 140px 1fr auto;
+    gap: 1rem;
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.2rem 1.4rem;
+  }
+  .timeline-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--mid);
+  }
+  .timeline-item h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+  }
+  .timeline-item p {
+    color: #666;
+    font-size: 0.88rem;
+  }
+  .timeline-mark {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink);
+    background: #f5f3ee;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  #downloads {
+    background: #dfeae4;
+    color: var(--ink);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  #downloads .section-label { color: #00b89a; }
+  #downloads .section-title { color: var(--ink); max-width: none; }
+  .downloads-sub {
+    margin-top: 0.8rem;
+    color: #55605b;
+    font-size: 0.98rem;
+  }
+  .downloads-block + .downloads-block { margin-top: 4rem; }
+  .downloads-block-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.8rem, 2.4vw, 2.6rem);
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.03em;
+  }
+  .downloads-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.25rem;
+    margin-top: 2rem;
+  }
+  .download-card {
+    background: #fff;
+    color: var(--ink);
+    border: 1px solid #cfd8d2;
+    border-radius: 6px;
+    padding: 0;
+    box-shadow: 0 8px 24px rgba(12, 22, 18, 0.06);
+    overflow: hidden;
+    min-height: 176px;
+    display: flex;
+    flex-direction: column;
+  }
+  .download-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 34px rgba(12, 22, 18, 0.10);
+  }
+  .download-main {
+    padding: 1rem 1rem 1.1rem;
+    flex: 1;
+  }
+  .download-title {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.98rem;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 0.85rem;
+    color: #2c2f33;
+  }
+  .download-icon {
+    font-size: 0.95rem;
+    line-height: 1.3;
+    flex-shrink: 0;
+  }
+  .download-date {
+    color: #818684;
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+  .download-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+    border-top: 1px solid #d7ddda;
+    font-size: 0.8rem;
+    gap: 1rem;
+  }
+  .download-type {
+    color: #222b27;
+    font-weight: 500;
+  }
+  .download-link {
+    color: #00b89a;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .download-link:hover { text-decoration: underline; }
+  .achievements {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .achievement-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.8rem;
+  }
+  .achievement-card strong {
+    display: block;
+    font-family: 'Syne', sans-serif;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+  }
+  .achievement-card span {
+    color: #666;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+  #contact {
+    background: linear-gradient(135deg, #0a0a12 0%, #141424 100%);
+    color: var(--paper);
+  }
+  #contact .section-label { color: var(--gold); }
+  #contact .section-title { color: var(--paper); }
+  #contact .contact-card {
+    background: #13131d;
+    border-color: #222231;
+    box-shadow: none;
+  }
+  #contact .contact-card p, #contact .contact-card a { color: #b8b8c8; }
+  #contact .contact-card a { text-decoration: none; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #050508;
+    color: #444;
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1rem;
+    color: #666; letter-spacing: -0.02em;
+  }
+  .footer-note { font-size: 0.8rem; color: #333; }
+  .footer-links { display: flex; gap: 1.5rem; }
+  .footer-links a { font-size: 0.8rem; color: #444; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--electric); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .reveal {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 960px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 6rem 1.5rem 3rem; gap: 2rem; }
+    .hero-visual { display: none; }
+    section { padding: 4rem 1.5rem; }
+    .overview-grid, .components-intro, .xai-grid, .scope-grid, .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .downloads-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .components-grid { grid-template-columns: 1fr; }
+    .team-grid { grid-template-columns: repeat(2, 1fr); }
+    .downloads-block + .downloads-block { margin-top: 3rem; }
+    .impact-cards, .achievements { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .timeline-item { grid-template-columns: 1fr; }
+    footer { flex-direction: column; text-align: center; align-items: flex-start; }
+  }
+  @media (max-width: 640px) {
+    .downloads-grid { grid-template-columns: 1fr; }
+    .team-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#"><span class="dot"></span> NeuroPredict</a>
+  <ul class="nav-links">
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#scope">Scope</a></li>
+    <li><a href="#components">Components</a></li>
+    <li><a href="#methodology">Methodology</a></li>
+    <li><a href="#downloads">Downloads</a></li>
+    <li><a href="#team">Team</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-badge">Predictive Neuromarketing · XAI Research</div>
+    <h1 class="hero-title">
+      Bridging <em>Neural</em> &amp;<br>Behavioral Data<br>with XAI
+    </h1>
+    <p class="hero-sub">
+      A multimodal deep learning framework that fuses EEG signals with behavioral patterns to explain and predict consumer decision-making — transparently, ethically, and in real time.
+    </p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#scope">Project Scope</a>
+      <a class="btn-ghost" href="#downloads">Downloads</a>
+    </div>
+  </div>
+
+  <!-- SVG Brain / EEG Visualization -->
+  <div class="hero-visual">
+    <div class="brain-diagram">
+      <svg class="brain-svg-wrap" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="glow1" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00e5c0" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#00e5c0" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="glow2" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#7b5ea7" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#7b5ea7" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Background circles -->
+        <circle cx="250" cy="250" r="200" fill="url(#glow1)" opacity="0.5"/>
+        <circle cx="250" cy="250" r="150" fill="url(#glow2)" opacity="0.4"/>
+
+        <!-- Outer ring -->
+        <circle cx="250" cy="250" r="195" stroke="#00e5c0" stroke-width="1" stroke-dasharray="8 6" opacity="0.3">
+          <animateTransform attributeName="transform" type="rotate" from="0 250 250" to="360 250 250" dur="30s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="250" cy="250" r="165" stroke="#7b5ea7" stroke-width="1" stroke-dasharray="4 10" opacity="0.25">
+          <animateTransform attributeName="transform" type="rotate" from="360 250 250" to="0 250 250" dur="20s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Brain silhouette (simplified) -->
+        <ellipse cx="250" cy="235" rx="120" ry="105" fill="#0a0a12" stroke="#1a1a2e" stroke-width="2"/>
+        <path d="M180 200 Q170 170 200 155 Q220 145 240 160 Q255 145 275 150 Q300 155 305 175 Q320 165 325 185 Q340 200 330 220 Q345 240 335 260 Q330 280 315 285 Q305 300 285 295 Q270 310 250 305 Q230 315 215 305 Q195 300 185 285 Q165 275 168 255 Q160 235 180 200Z" fill="#101020" stroke="#00e5c030" stroke-width="1.5"/>
+
+        <!-- EEG wave lines across brain -->
+        <path d="M185 240 Q195 225 205 240 Q215 255 225 235 Q235 215 245 240 Q255 265 265 240 Q275 215 285 235 Q295 255 305 240" stroke="#00e5c0" stroke-width="2" fill="none" opacity="0.8">
+          <animate attributeName="d" dur="3s" repeatCount="indefinite"
+            values="M185 240 Q195 225 205 240 Q215 255 225 235 Q235 215 245 240 Q255 265 265 240 Q275 215 285 235 Q295 255 305 240;
+                    M185 240 Q195 255 205 240 Q215 225 225 248 Q235 270 245 248 Q255 225 265 248 Q275 270 285 248 Q295 225 305 240;
+                    M185 240 Q195 225 205 240 Q215 255 225 235 Q235 215 245 240 Q255 265 265 240 Q275 215 285 235 Q295 255 305 240"/>
+        </path>
+        <path d="M190 265 Q202 252 210 265 Q218 278 228 258 Q238 238 248 263 Q258 288 268 263 Q278 238 288 258 Q298 278 308 265" stroke="#7b5ea7" stroke-width="1.5" fill="none" opacity="0.6">
+          <animate attributeName="d" dur="2.3s" repeatCount="indefinite"
+            values="M190 265 Q202 252 210 265 Q218 278 228 258 Q238 238 248 263 Q258 288 268 263 Q278 238 288 258 Q298 278 308 265;
+                    M190 265 Q202 278 210 265 Q218 252 228 272 Q238 292 248 267 Q258 242 268 267 Q278 292 288 272 Q298 252 308 265;
+                    M190 265 Q202 252 210 265 Q218 278 228 258 Q238 238 248 263 Q258 288 268 263 Q278 238 288 258 Q298 278 308 265"/>
+        </path>
+
+        <!-- Electrode dots -->
+        <g opacity="0.9">
+          <circle cx="215" cy="180" r="5" fill="#00e5c0"><animate attributeName="opacity" values="1;0.3;1" dur="2.1s" repeatCount="indefinite"/></circle>
+          <circle cx="250" cy="170" r="5" fill="#00e5c0"><animate attributeName="opacity" values="0.3;1;0.3" dur="1.8s" repeatCount="indefinite"/></circle>
+          <circle cx="285" cy="180" r="5" fill="#00e5c0"><animate attributeName="opacity" values="1;0.4;1" dur="2.4s" repeatCount="indefinite"/></circle>
+          <circle cx="195" cy="230" r="4" fill="#7b5ea7"><animate attributeName="opacity" values="0.4;1;0.4" dur="1.6s" repeatCount="indefinite"/></circle>
+          <circle cx="305" cy="230" r="4" fill="#7b5ea7"><animate attributeName="opacity" values="1;0.3;1" dur="2.2s" repeatCount="indefinite"/></circle>
+          <circle cx="185" cy="270" r="4" fill="#ff4d6d"><animate attributeName="opacity" values="0.5;1;0.5" dur="1.9s" repeatCount="indefinite"/></circle>
+          <circle cx="315" cy="270" r="4" fill="#ff4d6d"><animate attributeName="opacity" values="1;0.4;1" dur="2.6s" repeatCount="indefinite"/></circle>
+          <circle cx="250" cy="295" r="5" fill="#e8c84a"><animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/></circle>
+        </g>
+
+        <!-- Floating data labels -->
+        <g font-family="DM Mono, monospace" font-size="9" fill="#00e5c0" opacity="0.7">
+          <text x="120" y="195">α wave</text>
+          <text x="340" y="210">β rhythm</text>
+          <text x="115" y="305">θ band</text>
+          <text x="340" y="290">fixation</text>
+          <text x="200" y="350">RT: 342ms</text>
+          <text x="275" y="355">gaze →</text>
+        </g>
+
+        <!-- Connection lines from electrodes to labels -->
+        <line x1="215" y1="180" x2="160" y2="190" stroke="#00e5c0" stroke-width="0.5" opacity="0.3"/>
+        <line x1="285" y1="180" x2="350" y2="205" stroke="#00e5c0" stroke-width="0.5" opacity="0.3"/>
+        <line x1="185" y1="270" x2="150" y2="300" stroke="#00e5c0" stroke-width="0.5" opacity="0.3"/>
+        <line x1="315" y1="270" x2="355" y2="285" stroke="#00e5c0" stroke-width="0.5" opacity="0.3"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <div class="section-label">Research Overview</div>
+  <h2 class="section-title reveal">Why <em>Neuro&shy;marketing</em> Needs XAI</h2>
+
+  <div class="overview-grid">
+    <div class="overview-text reveal reveal-delay-1">
+      <p>Consumer decision-making is shaped by <strong>subconscious neural processes</strong> that traditional self-report methods cannot access. By combining EEG brain signals with observable behavioral patterns — eye-tracking, reaction times, gaze sequences — we can build far richer predictive models.</p>
+      <p>But prediction alone is not enough. Our research goes further: we apply <strong>Explainable AI (XAI)</strong> to make these models transparent, interpretable, and ethically aligned — ensuring insights are trustworthy and actionable for marketers, researchers, and regulators alike.</p>
+      <p>This four-component framework covers multimodal fusion, temporal behavioral dynamics, ethical transparency, and adaptive context-aware prediction — forming a complete end-to-end system for next-generation consumer intelligence.</p>
+    </div>
+
+    <div class="stat-grid reveal reveal-delay-2">
+      <div class="stat-item">
+        <div class="stat-num">4</div>
+        <div class="stat-label">Research Components</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Data Modalities (Neural + Behavioral)</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">XAI</div>
+        <div class="stat-label">Explainable AI at every layer</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">Ethical</div>
+        <div class="stat-label">Trust & manipulation risk scoring</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- PROJECT SCOPE -->
+<section id="scope">
+  <div class="section-label">Project Scope</div>
+  <h2 class="section-title reveal">A research website that covers both the <em>science</em> and the <em>project journey</em></h2>
+
+  <div class="scope-grid">
+    <div class="scope-card reveal">
+      <h3>Literature Survey</h3>
+      <p>Your current site explains the framework well, but it does not yet surface a dedicated literature review section like the reference website. Adding one strengthens the academic narrative and helps evaluators quickly understand the foundation of the research.</p>
+      <ul class="scope-list">
+        <li>Summarize prior work on EEG-based consumer analysis</li>
+        <li>Review multimodal fusion methods and temporal modelling</li>
+        <li>Cover XAI methods used in behavioural and neural prediction</li>
+      </ul>
+    </div>
+
+    <div class="scope-card reveal reveal-delay-1">
+      <h3>Research Gap & Problem Statement</h3>
+      <p>A clear gap section helps distinguish your work from existing neuromarketing pipelines. This should explain why combining neural signals, behaviour, explainability, and adaptive AI is necessary, and what current approaches fail to achieve.</p>
+      <ul class="scope-list">
+        <li>Lack of transparent multimodal decision prediction</li>
+        <li>Limited ethical auditing in neuromarketing AI systems</li>
+        <li>Insufficient context-aware personalization in existing models</li>
+      </ul>
+    </div>
+
+    <div class="scope-card reveal reveal-delay-2">
+      <h3>Research Objectives</h3>
+      <p>Separate the objectives from the component cards so assessors can scan the academic goals quickly. Each objective can map to one of your four components.</p>
+      <ul class="scope-list">
+        <li>Fuse EEG and behavioural data for robust decision prediction</li>
+        <li>Model temporal behavioural dynamics in consumer journeys</li>
+        <li>Design an ethically transparent XAI layer</li>
+        <li>Adapt decisions using context-aware and personalized AI</li>
+      </ul>
+    </div>
+
+    <div class="scope-card reveal reveal-delay-3">
+      <h3>Technologies Used</h3>
+      <p>The reference site showcases the toolchain as a standalone section. Doing the same here makes implementation maturity more visible and gives technical reviewers a fast summary.</p>
+      <div class="tech-stack">
+        <span class="tech-chip">Python</span>
+        <span class="tech-chip">PyTorch / TensorFlow</span>
+        <span class="tech-chip">MNE</span>
+        <span class="tech-chip">PsychoPy</span>
+        <span class="tech-chip">SHAP / LIME</span>
+        <span class="tech-chip">DiCE</span>
+        <span class="tech-chip">Fairlearn</span>
+        <span class="tech-chip">HTML / CSS / JS</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DELIVERABLES -->
+<section id="deliverables">
+  <div class="section-label">Project Journey</div>
+  <h2 class="section-title reveal">Milestones, evaluations, and <em>academic deliverables</em></h2>
+
+  <div class="timeline">
+    <div class="timeline-item reveal">
+      <div class="timeline-date">March 2025</div>
+      <div>
+        <h4>Project Proposal</h4>
+        <p>Initial problem framing, literature grounding, and methodology direction.</p>
+      </div>
+      <div class="timeline-mark">Proposal</div>
+    </div>
+    <div class="timeline-item reveal reveal-delay-1">
+      <div class="timeline-date">June 2025</div>
+      <div>
+        <h4>Progress Presentation I</h4>
+        <p>Early validation of datasets, component definitions, and experimental design.</p>
+      </div>
+      <div class="timeline-mark">50%</div>
+    </div>
+    <div class="timeline-item reveal reveal-delay-2">
+      <div class="timeline-date">August 2025</div>
+      <div>
+        <h4>Research Paper Submission</h4>
+        <p>Formal contribution to the literature including modelling, explainability, and ethics.</p>
+      </div>
+      <div class="timeline-mark">Paper</div>
+    </div>
+    <div class="timeline-item reveal reveal-delay-3">
+      <div class="timeline-date">October 2025</div>
+      <div>
+        <h4>Progress Presentation II</h4>
+        <p>Integrated demonstration of framework components and evaluation outcomes.</p>
+      </div>
+      <div class="timeline-mark">90%</div>
+    </div>
+    <div class="timeline-item reveal">
+      <div class="timeline-date">November 2025</div>
+      <div>
+        <h4>Final Report & Viva</h4>
+        <p>Complete research documentation, implementation evidence, and final defense.</p>
+      </div>
+      <div class="timeline-mark">Final</div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPONENTS -->
+<section id="components">
+  <div class="components-intro">
+    <div>
+      <div class="section-label">Four Research Components</div>
+      <h2 class="section-title reveal">Each Layer of the <em>Framework</em></h2>
+    </div>
+    <p class="reveal reveal-delay-1">
+      Our research is structured across four complementary components, each tackling a distinct dimension of the consumer decision-making problem — from raw signal processing to ethical accountability.
+    </p>
+  </div>
+
+  <div class="components-grid">
+
+    <!-- C1 -->
+    <div class="component-card card-c1 reveal">
+      <div class="card-number">COMPONENT 01</div>
+      <div class="card-tag">Neural + Behavioral Fusion</div>
+      <h3 class="card-title">Multimodal Neural–Behavioral Integration</h3>
+      <p class="card-desc">
+        Synchronized EEG and behavioral datasets are acquired, preprocessed, and fused through an attention-based deep learning architecture. Unimodal baselines (CNN-LSTM for EEG, LSTM/GRU for behavior) are compared against the joint multimodal model. SHAP values reveal which neural and behavioral features drive consumer choices.
+      </p>
+      <div class="card-methods">
+        <span class="method-pill">EEG (OpenNeuro, DEAP)</span>
+        <span class="method-pill">CNN-LSTM</span>
+        <span class="method-pill">Attention Fusion</span>
+        <span class="method-pill">SHAP</span>
+        <span class="method-pill">ICA Artifact Removal</span>
+      </div>
+      <div class="card-researcher">
+        <div class="researcher-avatar">CR</div>
+        <span>Ranawakaarachchi C P · Neural & Behavioral Integration</span>
+      </div>
+    </div>
+
+    <!-- C2 -->
+    <div class="component-card card-c2 reveal reveal-delay-1">
+      <div class="card-number">COMPONENT 02</div>
+      <div class="card-tag">Temporal Dynamics</div>
+      <h3 class="card-title">Behavioral Dynamics in Decision-Making</h3>
+      <p class="card-desc">
+        How do decisions evolve moment-to-moment? This component models the temporal structure of consumer behavior using LSTM and GRU sequence models. Unsupervised clustering uncovers latent decision styles — impulsive, reflective, vacillating — and PsychoPy-controlled experiments capture fine-grained behavioral signals across value trade-off scenarios.
+      </p>
+      <div class="card-methods">
+        <span class="method-pill">LSTM / GRU</span>
+        <span class="method-pill">Temporal Clustering</span>
+        <span class="method-pill">PsychoPy</span>
+        <span class="method-pill">Eye-Tracking</span>
+        <span class="method-pill">TASC Motif Analysis</span>
+      </div>
+      <div class="card-researcher">
+        <div class="researcher-avatar">KT</div>
+        <span>Kavindya T A S · Behavioral Decision Dynamics</span>
+      </div>
+    </div>
+
+    <!-- C3 -->
+    <div class="component-card card-c3 reveal reveal-delay-2">
+      <div class="card-number">COMPONENT 03</div>
+      <div class="card-tag">Ethical Transparency</div>
+      <h3 class="card-title">Ethically Transparent XAI Framework</h3>
+      <p class="card-desc">
+        Predictive power without transparency raises ethical red flags. This component wraps the predictive models in a four-module XAI layer: dual-layer explainability (neural time-series + behavioral psychology), counterfactual "what-if" scenarios, ethical scoreboards measuring trust and manipulation risk, and interactive dashboards for non-technical stakeholders.
+      </p>
+      <div class="card-methods">
+        <span class="method-pill">SHAP / LIME</span>
+        <span class="method-pill">Counterfactuals (DiCE)</span>
+        <span class="method-pill">Fairlearn / AIF360</span>
+        <span class="method-pill">Trust Index</span>
+        <span class="method-pill">Bias Detection</span>
+      </div>
+      <div class="card-researcher">
+        <div class="researcher-avatar">SI</div>
+        <span>Senanayaka I H D M · XAI & Ethical Transparency</span>
+      </div>
+    </div>
+
+    <!-- C4 -->
+    <div class="component-card card-c4 reveal reveal-delay-3">
+      <div class="card-number">COMPONENT 04</div>
+      <div class="card-tag">Adaptive AI</div>
+      <h3 class="card-title">Contextual Decision Modelling & Adaptive AI</h3>
+      <p class="card-desc">
+        Real-world consumers don't behave like lab subjects. This component introduces a context-aware layer that conditions predictions on product category, device, emotional state, and environment. Meta-learning enables rapid personalization for new users, while contextual bandit policies select optimal content and nudges from continuous interaction feedback.
+      </p>
+      <div class="card-methods">
+        <span class="method-pill">FiLM / Hypernetworks</span>
+        <span class="method-pill">MAML Meta-Learning</span>
+        <span class="method-pill">Contextual Bandits</span>
+        <span class="method-pill">Transformer Fusion</span>
+        <span class="method-pill">LoRA Adapters</span>
+      </div>
+      <div class="card-researcher">
+        <div class="researcher-avatar">SM</div>
+        <span>Shahaam M M · Contextual & Adaptive AI</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- METHODOLOGY -->
+<section id="methodology">
+  <div class="section-label">System Pipeline</div>
+  <h2 class="section-title reveal">From Raw Signal<br>to <em>Actionable Insight</em></h2>
+
+  <div class="pipeline reveal reveal-delay-1">
+    <div class="pipeline-track"></div>
+    <div class="pipeline-steps">
+
+      <div class="pipeline-step">
+        <div class="step-marker">
+          <div class="step-dot" style="--step-color: #00e5c0"></div>
+          <span class="step-num">01</span>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Data Acquisition</div>
+          <p class="step-desc">EEG signals are sourced from public repositories (OpenNeuro, DEAP) and collected from volunteer participants in controlled experiments. Behavioral data — eye-tracking metrics, reaction times, gaze sequences, and self-reported difficulty — is captured using PsychoPy-designed decision scenarios involving value trade-offs.</p>
+          <div class="step-tags">
+            <span class="step-tag">OpenNeuro</span>
+            <span class="step-tag">DEAP Dataset</span>
+            <span class="step-tag">MAMEM</span>
+            <span class="step-tag">PsychoPy</span>
+           
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-marker">
+          <div class="step-dot" style="--step-color: #7b5ea7"></div>
+          <span class="step-num">02</span>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Preprocessing & Feature Engineering</div>
+          <p class="step-desc">EEG signals undergo bandpass filtering, ICA-based artifact removal, and frequency-band extraction (alpha, beta, theta). Behavioral streams are cleaned, synchronized, and normalized. EEG epochs are converted to time-frequency representations; behavioral sequences are encoded into temporal feature sets ready for modeling.</p>
+          <div class="step-tags">
+            <span class="step-tag">MNE Python</span>
+            <span class="step-tag">ICA</span>
+            <span class="step-tag">Bandpass Filter</span>
+            <span class="step-tag">Fixation Detection</span>
+            <span class="step-tag">Temporal Alignment</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-marker">
+          <div class="step-dot" style="--step-color: #ff4d6d"></div>
+          <span class="step-num">03</span>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Unimodal Baselines & Behavioral Clustering</div>
+          <p class="step-desc">CNN-LSTM models capture spatial-temporal EEG patterns; LSTM/GRU models handle behavioral sequences. Simultaneously, unsupervised temporal clustering (TASC and motif-based) segments participants into latent decision strategy groups — enabling a richer understanding before multimodal fusion.</p>
+          <div class="step-tags">
+            <span class="step-tag">CNN-LSTM</span>
+            <span class="step-tag">LSTM / GRU</span>
+            <span class="step-tag">K-Means</span>
+            
+    
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-marker">
+          <div class="step-dot" style="--step-color: #e8c84a"></div>
+          <span class="step-num">04</span>
+        </div>
+        <div class="step-content">
+          <div class="step-title">Multimodal Attention-Based Fusion</div>
+          <p class="step-desc">EEG and behavioral representations are fused through cross-modal attention mechanisms. A context-aware modulation layer (FiLM/hypernetwork) conditions the fused representation on situational variables. Meta-learned user adapters enable fast personalization, and a contextual bandit policy selects optimal actions from continuous feedback.</p>
+          <div class="step-tags">
+            <span class="step-tag">Cross-Attention</span>
+            <span class="step-tag">FiLM Modulation</span>
+            <span class="step-tag">MAML</span>
+            <span class="step-tag">Contextual Bandit</span>
+            <span class="step-tag">Transformer</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="pipeline-step">
+        <div class="step-marker">
+          <div class="step-dot" style="--step-color: #00e5c0"></div>
+          <span class="step-num">05</span>
+        </div>
+        <div class="step-content">
+          <div class="step-title">XAI Layer & Ethical Evaluation</div>
+          <p class="step-desc">SHAP values and integrated gradients attribute neural and behavioral contributions to each prediction. Counterfactual explanations generate actionable "what-if" scenarios. Ethical scoreboards quantify trust indices, bias across demographic groups, and manipulation risk — providing auditable accountability for every prediction.</p>
+          <div class="step-tags">
+            <span class="step-tag">SHAP</span>
+            <span class="step-tag">LIME</span>
+            <span class="step-tag">DiCE Counterfactuals</span>
+            <span class="step-tag">Fairlearn</span>
+            <span class="step-tag">AIF360</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- XAI HIGHLIGHT -->
+<section id="xai">
+  <div class="xai-grid">
+    <div>
+      <div class="section-label">Explainability & Ethics</div>
+      <h2 class="section-title reveal">AI That Explains <em>Itself</em></h2>
+      <p style="margin-top:1.2rem; color:#555; font-size:1rem; line-height:1.8; font-weight:300; max-width:40ch;" class="reveal reveal-delay-1">
+        Black-box predictions erode trust. Our XAI framework ensures every consumer insight comes with a clear, auditable explanation — accessible to researchers, marketers, and regulators equally.
+      </p>
+    </div>
+
+    <div class="xai-features reveal reveal-delay-2">
+      <div class="xai-feature">
+        <div class="xai-icon" style="background:#f0faf8;">🧠</div>
+        <div class="xai-feature-text">
+          <h4>Dual-Layer Explainability</h4>
+          <p>Neural time-series attribution highlights which EEG moments influence decisions. Behavioral attribution maps model outputs to established cognitive psychology principles.</p>
+        </div>
+      </div>
+      <div class="xai-feature">
+        <div class="xai-icon" style="background:#fff0f3;">🔀</div>
+        <div class="xai-feature-text">
+          <h4>Counterfactual "What-If" Scenarios</h4>
+          <p>Interactive exploration of how small changes in neural or behavioral inputs would alter predicted outcomes — actionable and non-manipulative by design.</p>
+        </div>
+      </div>
+      <div class="xai-feature">
+        <div class="xai-icon" style="background:#fdf8e8;">⚖️</div>
+        <div class="xai-feature-text">
+          <h4>Ethical Scoreboards</h4>
+          <p>Quantified trust indices, bias detection across demographic groups, and manipulation risk scores give every prediction a measurable ethical profile.</p>
+        </div>
+      </div>
+      <div class="xai-feature">
+        <div class="xai-icon" style="background:#f3f0fa;">📊</div>
+        <div class="xai-feature-text">
+          <h4>Adaptive Temporal Saliency</h4>
+          <p>For sequential decisions, attention visualization and temporal saliency maps pinpoint the exact moments when behavioral shifts occur and explain why.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section id="impact">
+  <div class="section-label">Real-World Impact</div>
+  <h2 class="section-title reveal">Who Benefits from<br><em>This Research</em></h2>
+
+  <div class="impact-cards">
+    <div class="impact-card reveal" style="--ic-color: #00e5c0;">
+      <div class="impact-icon">🛒</div>
+      <h3>Marketers & Brands</h3>
+      <p>Design ethically responsible campaigns grounded in genuine consumer insight — not black-box guesswork. Understand why consumers choose, not just what they choose.</p>
+    </div>
+    <div class="impact-card reveal reveal-delay-1" style="--ic-color: #7b5ea7;">
+      <div class="impact-icon">🔬</div>
+      <h3>Neuromarketing Researchers</h3>
+      <p>A reproducible, open-framework for multimodal consumer studies. Validate findings with real EEG data. Advance the science of decision prediction with interpretable, peer-reviewable models.</p>
+    </div>
+    <div class="impact-card reveal reveal-delay-2" style="--ic-color: #ff4d6d;">
+      <div class="impact-icon">🏛️</div>
+      <h3>Regulators & Policy Makers</h3>
+      <p>Ethical scoreboards and manipulation risk indicators provide auditable evidence for AI accountability in advertising — supporting compliance with emerging AI governance frameworks.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section id="team">
+  <div class="section-label">Research Team</div>
+  <h2 class="section-title reveal">The People Behind<br>the <em>Framework</em></h2>
+
+  <div class="team-grid">
+    <div class="team-card reveal">
+      <div class="team-photo-wrap">
+        <img class="team-photo" src="team_photos/ranawakaarachchi-cp.svg" alt="Portrait of Ranawakaarachchi C P">
+        <span class="team-photo-badge" style="background: linear-gradient(135deg, #00e5c0, #00b89a);">CR</span>
+      </div>
+      <div class="team-name">Ranawakaarachchi C P</div>
+      <div class="team-role">Neural &amp; Behavioral Integration for Consumer Insights</div>
+      <span class="team-focus" style="background:#f0faf8; color:#00b89a;">Component 01</span>
+    </div>
+    <div class="team-card reveal reveal-delay-1">
+      <div class="team-photo-wrap">
+        <img class="team-photo" src="team_photos/kavindya-tas.svg" alt="Portrait of Kavindya T A S">
+        <span class="team-photo-badge" style="background: linear-gradient(135deg, #7b5ea7, #5e4080);">KT</span>
+      </div>
+      <div class="team-name">Kavindya T A S</div>
+      <div class="team-role">Behavioral Dynamics in Decision-Making Scenarios</div>
+      <span class="team-focus" style="background:#f3f0fa; color:#7b5ea7;">Component 02</span>
+    </div>
+    <div class="team-card reveal reveal-delay-2">
+      <div class="team-photo-wrap">
+        <img class="team-photo" src="team_photos/senanayaka-ihdm.svg" alt="Portrait of Senanayaka I H D M">
+        <span class="team-photo-badge" style="background: linear-gradient(135deg, #ff4d6d, #cc2244);">SI</span>
+      </div>
+      <div class="team-name">Senanayaka I H D M</div>
+      <div class="team-role">Ethically Transparent XAI Framework</div>
+      <span class="team-focus" style="background:#fff0f3; color:#cc2244;">Component 03</span>
+    </div>
+    <div class="team-card reveal reveal-delay-3">
+      <div class="team-photo-wrap">
+        <img class="team-photo" src="team_photos/shahaam-mm.jpg" alt="Portrait of Shahaam M M">
+        <span class="team-photo-badge" style="background: linear-gradient(135deg, #e8c84a, #b8940a); color: #111;">SM</span>
+      </div>
+      <div class="team-name">Shahaam M M</div>
+      <div class="team-role">Contextual Decision Modelling &amp; Adaptive AI</div>
+      <span class="team-focus" style="background:#fdf8e8; color:#b8940a;">Component 04</span>
+    </div>
+  </div>
+
+  <!-- Supervisors -->
+  <div style="margin-top:3rem; padding-top:2.5rem; border-top:1px solid var(--border);">
+    <div class="section-label" style="margin-bottom:1.5rem;">Supervisory Team</div>
+    <div style="display:flex; gap:2rem; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:0.8rem;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#e8e5de;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#555;">SR</div>
+        <div>
+          <div style="font-weight:600;font-size:0.9rem;">Mr. Samadhi Rathnayake</div>
+          <div style="font-size:0.78rem;color:var(--mid);">Supervisor</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.8rem;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#e8e5de;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#555;">SS</div>
+        <div>
+          <div style="font-weight:600;font-size:0.9rem;">Ms. Samanthi Siriwardhana</div>
+          <div style="font-size:0.78rem;color:var(--mid);">Co-Supervisor</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:0.8rem;">
+        <div style="width:40px;height:40px;border-radius:50%;background:#e8e5de;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#555;">KG</div>
+        <div>
+          <div style="font-weight:600;font-size:0.9rem;">Dr. Kamal Gunarathne</div>
+          <div style="font-size:0.78rem;color:var(--mid);">External Supervisor</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- DOWNLOADS -->
+<section id="downloads">
+  <div class="downloads-block">
+    <div class="section-label">Downloads</div>
+    <h2 class="downloads-block-title reveal">Documents</h2>
+    <p class="downloads-sub reveal reveal-delay-1">Please find all documents related to this project below.</p>
+
+    <div class="downloads-grid">
+      <div class="download-card reveal">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Topic Assessment</span></div>
+          <p class="download-date">Submitted on 2024/02/25</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-1">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Project Charter</span></div>
+          <p class="download-date">Submitted on 2024/02/25</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-2">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Project Proposal</span></div>
+          <p class="download-date">Submitted on 2024/03/22</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Individual</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-3">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Status Documents I</span></div>
+          <p class="download-date">Submitted on 2024/07/05</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Individual</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Status Documents II</span></div>
+          <p class="download-date">Yet to be submitted, link will be updated soon.</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Individual</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-1">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Research Paper</span></div>
+          <p class="download-date">Yet to be submitted, link will be updated soon.</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-2">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Final Report</span></div>
+          <p class="download-date">Submitted on 2024/10/13</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-3">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📄</span><span>Poster</span></div>
+          <p class="download-date">Submitted on 2024/10/13</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="downloads-block">
+    <h2 class="downloads-block-title reveal">Presentations</h2>
+    <p class="downloads-sub reveal reveal-delay-1">Please find all presentations related to this project below.</p>
+
+    <div class="downloads-grid">
+      <div class="download-card reveal">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📑</span><span>Project Proposal</span></div>
+          <p class="download-date">Submitted on 2024/03/14</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-1">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📑</span><span>Progress Presentation I</span></div>
+          <p class="download-date">Submitted on 2024/07/08</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-2">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📑</span><span>Progress Presentation II</span></div>
+          <p class="download-date">Submitted on 2024/10/18</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+      <div class="download-card reveal reveal-delay-3">
+        <div class="download-main">
+          <div class="download-title"><span class="download-icon">📑</span><span>Final Presentation</span></div>
+          <p class="download-date">Yet to be submitted, link will be updated soon.</p>
+        </div>
+        <div class="download-bottom">
+          <span class="download-type">Group</span>
+          <a class="download-link" href="#">Download</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ACHIEVEMENTS -->
+<section id="achievements">
+  <div class="section-label">Highlights</div>
+  <h2 class="section-title reveal">Evidence of progress and <em>key outcomes</em></h2>
+
+  <div class="achievements">
+    <div class="achievement-card reveal">
+      <strong>Multimodal Research Design</strong>
+      <span>Integrated neural, behavioural, ethical, and contextual modelling into one end-to-end research framework.</span>
+    </div>
+    <div class="achievement-card reveal reveal-delay-1">
+      <strong>Explainable AI Focus</strong>
+      <span>Placed interpretability and ethical accountability at the core of the predictive architecture rather than as an afterthought.</span>
+    </div>
+    <div class="achievement-card reveal reveal-delay-2">
+      <strong>Adaptive Decision Modelling</strong>
+      <span>Extended beyond static prediction by proposing personalized and context-aware consumer modelling strategies.</span>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label">Contact Us</div>
+  <h2 class="section-title reveal">Reach the <em>research team</em> and supervisory panel</h2>
+
+  <div class="contact-grid">
+    <div class="contact-card reveal">
+      <h3>Project Inquiries</h3>
+      <p>Use this section to provide the primary contact email, university affiliation, and any repository or publication links for academic communication.</p>
+      <p><a href="mailto:shahaammarzook@aiesec.net">shahaammarzook@aiesec.net</a></p>
+    </div>
+    <div class="contact-card reveal reveal-delay-1">
+      <h3>Team & Supervision</h3>
+      <p>Include direct links to team profiles, LinkedIn, GitHub, or Google Scholar pages if available. This makes the site feel complete and professional for assessments.</p>
+      <p>Supervisor, Co-Supervisor, and External Supervisor details are already available above.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">⬡ NeuroPredict</div>
+  <div class="footer-note">Bridging Neural &amp; Behavioral Data with XAI in Predictive Neuromarketing · 25-26J-145-DS</div>
+  <div class="footer-links">
+    <a href="#overview">Overview</a>
+    <a href="#scope">Scope</a>
+    <a href="#downloads">Downloads</a>
+    <a href="#team">Team</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Smooth nav highlight
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 120) current = s.id;
+    });
+    navLinks.forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--ink)' : '';
+    });
+  });
+</script>
+</body>
+</html>
